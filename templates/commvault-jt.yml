@@ -13,7 +13,5 @@
       extra_vars:
         my_variable: "test"
       state: present
-      controller_host: "127.0.0.1"
-      controller_username: "admin"
       validate_certs: false # Set to true in production with valid certs
 
