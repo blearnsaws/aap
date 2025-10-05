@@ -1,0 +1,9 @@
+---
+- name: Commvault Test
+  hosts: localhost
+  tasks:
+  - name: Log in to the Commcell
+    commvault.ansible.login:
+      webserver_hostname: "{{ webserver_hostname }}" 
+      commcell_username: "{{ user }}"
+      commcell_password: "{{ password }}" 
