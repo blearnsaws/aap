@@ -18,3 +18,20 @@
       controller_password: "{{ controller_password }}"
       validate_certs: false # Set to true in production with valid certs
 
+      
+  - name: Create backup job template 2
+    awx.awx.job_template:
+      name: "commvault-backup-2-jt"
+      description: "commvault backup job template"
+      organization: "Linux" # Or the name of your organization
+      project: "aap-project" # Or the name of your project
+      playbook: "playbooks/commvault.yml"
+      inventory: "default" # Or the name of your inventory
+      extra_vars:
+        my_variable: "test"
+      state: present
+      controller_host: "https://192.168.3.41"
+      controller_username: "admin"
+      controller_password: "{{ controller_password }}"
+      validate_certs: false # Set to true in production with valid certs
+      
