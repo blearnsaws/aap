@@ -14,5 +14,7 @@
         my_variable: "test"
       state: present
       controller_host: "https://192.168.3.41"
+      controller_username: "admin"
+      controller_password: "{{ controller_password }}"
       validate_certs: false # Set to true in production with valid certs
 
