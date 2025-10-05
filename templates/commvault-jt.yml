@@ -13,6 +13,7 @@
       extra_vars:
         my_variable: "test"
       state: present
+      verbosity: 2
       controller_host: "https://192.168.3.41"
       controller_username: "admin"
       controller_password: "{{ controller_password }}"
