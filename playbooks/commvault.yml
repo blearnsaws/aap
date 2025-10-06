@@ -2,6 +2,11 @@
 - name: Commvault Test
   hosts: localhost
   tasks:
+  - name: Install Python packages with pip
+    ansible.builtin.pip:
+      name:
+      - cvpysdk
+
   - name: Log in to the Commcell
     commvault.ansible.login:
       webserver_hostname: "{{ webserver_hostname }}" 
