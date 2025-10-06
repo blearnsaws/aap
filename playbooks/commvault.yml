@@ -6,6 +6,7 @@
     ansible.builtin.pip:
       name:
       - cvpysdk
+      state: present
 
   - name: Log in to the Commcell
     commvault.ansible.login:
