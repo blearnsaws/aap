@@ -2,3 +2,4 @@
 collections:
   - name: awx.awx
   - name: commvault.ansible
+  - name: infra.aap_configuration

@@ -3,7 +3,7 @@
   hosts: localhost
   tasks:
   - name: Create inventory
-    controller_inventories:
+    infra.aap_configuration.controller_inventories:
       name: sample-infra-inventory
       orginization: Infra
       description: "Sample infra inventory"
@@ -12,13 +12,3 @@
       state: present
       variables: 
         - env: sample
-    
-#  controller_inventory_sources:
-#  - name: sourced_from_project
-#    source: scm
-#    source_project: inventory-project
-#    source_path: inventories/my_inv
-#    inventory: SCM-01
-#    description: Inventory sourced from a Project
-#    overwrite: true
-#    update_on_launch: true
