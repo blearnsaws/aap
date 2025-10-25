@@ -38,10 +38,26 @@
         path: /tmp/sosreports
         state: directory
         mode: '0755'
-              
+      delegate_to: localhost
+
+    - name: Find the sosreport archive file
+      find:
+        paths: /tmp/sosreports
+        patterns: "*{{ case_id }}-*.tar.xz"
+      register: found_files
+      when: sosreport_output.rc == 0
+
+    - name: Show found sosreport files
+      debug:
+        msg: "{{ found_files.files }}"
+      when: found_files.matched > 0
+
     - name: Copy the sosreport archive to local machine
       fetch:
-        src: "/tmp/sosreports/*"
+        src: "{{ item.path }}"
         dest: "/tmp/sosreport/"
         flat: yes
-      when: sosreport_output.rc == 0
+      with_items: "{{ found_files.files }}"
+      when: 
+      - found_files.matched > 0                      
+      - sosreport_output.rc == 0
