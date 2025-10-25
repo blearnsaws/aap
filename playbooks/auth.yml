@@ -1,0 +1,16 @@
+
+---
+- name: Get Auth Logs
+  hosts: all
+  become: yes
+  tasks:
+    - name: Get auth log file based on date
+      find:
+        paths: {{ log-path }}
+        patterns: "{{ log-date }}"
+      register: found_logs
+
+    - name: Display log files
+
+    - name: Send email of log file
+
