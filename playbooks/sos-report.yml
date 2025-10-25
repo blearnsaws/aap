@@ -1,0 +1,41 @@
+---
+- name: Run sosreport on remote host
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ensure sosreport is installed
+      package:
+        name: sos
+        state: present
+
+    - name: Create tmp sosreports directory
+      file:
+        path: /tmp/sosreports
+        state: directory
+        mode: '0755'
+
+    - name: Run sosreport command
+      command: "sosreport --batch --case-id={{ case_id }} --tmp-dir=/tmp/sosreports"
+      register: sosreport_output
+      ignore_errors: yes
+
+    - name: Show sosreport output
+      debug:
+        msg: "{{ sosreport_output.stdout }}"
+        
+    - name: Check if sosreport command was successful
+      debug:
+        msg: "sosreport completed successfully!"
+      when: sosreport_output.rc == 0
+
+    - name: Handle sosreport failure
+      debug:
+        msg: "sosreport failed to run!"
+      when: sosreport_output.rc != 0
+
+    - name: Copy the sosreport archive to local machine
+      fetch:
+        src: "/tmp/sosreports/*"
+        dest: "/tmp/sosreport/"
+        flat: yes
+      when: sosreport_output.rc == 0
