@@ -15,7 +15,7 @@
         mode: '0755'
 
     - name: Run sosreport command
-      command: "sosreport --batch --case-id={{ case_id }} --tmp-dir=/tmp/sosreports"
+      command: "sos report --batch --case-id={{ case_id }} --tmp-dir=/tmp/sosreports"
       register: sosreport_output
       ignore_errors: yes
 
