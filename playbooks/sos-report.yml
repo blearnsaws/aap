@@ -38,7 +38,7 @@
         path: /tmp/sosreports
         state: directory
         mode: '0755'
-      delegate_to: {{ bastion_host }}
+      delegate_to: "{{ bastion_host }}"
 
     - name: Find the sosreport archive file
       find:
@@ -57,7 +57,7 @@
         src: "{{ item.path }}"
         dest: "/tmp/sosreport/"
         flat: yes
-      delegate_to: {{ bastion_host }}
+      delegate_to: "{{ bastion_host }}"
       with_items: "{{ found_files.files }}"
       when: 
       - found_files.matched > 0                      
