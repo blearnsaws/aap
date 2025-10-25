@@ -1,0 +1,23 @@
+
+---
+- name: Get Auth Logs
+  hosts: all
+  become: yes
+  vars:
+    log_path: "/var/log/messages*"
+    log_date: "Oct 25"
+    email_address: "test_email@gmail.com"
+  tasks:
+    - name: Get auth log file based on date
+      shell: "ls -l {{ log_path }} | grep '{{ log_date }}'"
+      register: found_logs
+
+    - name: Display log files
+      debug:
+        msg: "{{ found_logs }}"
+      
+
+    - name: Send email of log file
+      shell: "echo the logs {{ item }} email will be sent to {{ email_address }}"
+      #shell mail -s "Authlog{{ log-date }}" -a {{ item }} {{ email_address }}  < /dev/null
+      with_items: "{{ found_logs.stdout_lines }}"
