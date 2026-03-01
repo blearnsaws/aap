@@ -3,6 +3,8 @@
 - name: Prepare and mount 12 data disks
   hosts: all
   become: true
+  vars_files:
+  - vars/main.yml
   tasks:
     - name: Get block devices (lsblk -p -P, no filesystem)
       shell: |
