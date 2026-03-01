@@ -1,0 +1,78 @@
+---
+# Playbook: prepare 12 data disks, create ext4, mount at /data/1..12, notify by email
+- name: Prepare and mount 12 data disks
+  hosts: all
+  become: true
+  tasks:
+    - name: Get block devices (lsblk -p -P, no filesystem)
+      shell: |
+        lsblk -p -P -o NAME,FSTYPE,MOUNTPOINT |
+        grep 'FSTYPE=""' |
+        sed -n 's/^NAME="\([^"]*\)".*/\1/p' |
+        grep -vE 'nvme0n1p1|/dev/sda[0-9]*$|/dev/sda$' |
+        sort -u
+      register: lsblk_unused
+      changed_when: false
+
+    - name: Set list of data disk paths
+      set_fact:
+        data_disk_paths: "{{ lsblk_unused.stdout_lines | select('match', '^/dev/') | list }}"
+
+    - name: Fail unless exactly 12 data disks are found
+      assert:
+        that:
+          - data_disk_paths | length == num_disks
+        fail_msg: "Expected exactly {{ num_disks }} data disks (unformatted, excluding root/swap/boot/nvme0n1p1/sda). Found {{ data_disk_paths | length }}: {{ data_disk_paths }}"
+        success_msg: "Found {{ num_disks }} data disks."
+
+    - name: Create mount points {{ mount_base }}/1 .. {{ mount_base }}/{{ num_disks }}
+      file:
+        path: "{{ mount_base }}/{{ item }}"
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+      loop: "{{ range(1, num_disks + 1) | list }}"
+
+    - name: Create {{ fs_type }} filesystem on each data disk
+      filesystem:
+        fstype: "{{ fs_type }}"
+        dev: "{{ data_disk_paths[item] }}"
+      loop: "{{ range(0, num_disks) | list }}"
+
+    - name: Get UUIDs after mkfs (blkid)
+      command: blkid -o value -s UUID {{ item }}
+      register: blkid_uuids
+      loop: "{{ data_disk_paths }}"
+      changed_when: false
+
+    - name: Set list of UUIDs for data disks
+      set_fact:
+        data_uuids: "{{ blkid_uuids.results | map(attribute='stdout') | list }}"
+
+    - name: Add fstab entries (UUID, defaults,noatime 0 0)
+      lineinfile:
+        path: /etc/fstab
+        line: "UUID={{ data_uuids[item | int - 1] }} {{ mount_base }}/{{ item }} {{ fs_type }} defaults,noatime 0 0"
+        state: present
+        backup: true
+      loop: "{{ range(1, num_disks + 1) | list }}"
+
+    - name: Mount all filesystems
+      command: mount -a
+
+    - name: List mounted filesystems under {{ mount_base }}
+      shell: mount | grep " {{ mount_base }}/" || true
+      register: mounted_list
+      changed_when: false
+
+    - name: Set mounted list for email
+      set_fact:
+        mounted_report: "{{ mounted_list.stdout_lines | default([]) | join('\n') }}"
+
+    - name: Send email with list of mounted filesystems
+      mail:
+        to: "{{ email_dl }}"
+        subject: "data disks mounted on {{ ansible_hostname }}"
+        body: "Mounted filesystems under {{ mount_base }}:\n\n{{ mounted_report }}"
+

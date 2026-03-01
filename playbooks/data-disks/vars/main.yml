@@ -1,0 +1,5 @@
+---
+mount_base: /data
+num_disks: 12
+fs_type: ext4
+email_dl: "admin@example.com"
