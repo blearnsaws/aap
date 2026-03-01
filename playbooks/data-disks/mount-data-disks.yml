@@ -18,7 +18,7 @@
       set_fact:
         data_disk_paths: "{{ lsblk_unused.stdout_lines | select('match', '^/dev/') | list }}"
 
-    - name: Fail unless exactly 12 data disks are found
+    - name: Fail unless exactly {{ num_disks }} data disks are found
       assert:
         that:
           - data_disk_paths | length == num_disks
